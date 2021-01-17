@@ -1,0 +1,58 @@
+package com.rewardpoints.api.controller;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.rewardpoints.api.impl.RewardsCalculator;
+import com.rewardpoints.domain.Customer;
+import com.rewardpoints.domain.Transaction;
+import com.rewardpoints.dto.GetCustomerTransactionsResponse;
+import com.rewardpoints.repository.CustomerRepository;
+import com.rewardpoints.repository.TransactionRepository;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:8081")
+public class RewardsController {
+
+	@Autowired
+	RewardsCalculator rewardsCalculator;
+
+	@Autowired
+	CustomerRepository customerRepository;
+
+	@Autowired
+	TransactionRepository transactionRepository;
+
+	@GetMapping(path = "/rewardPoints/customers", produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody List<Customer> getCustomers() {
+
+		return customerRepository.findAll();
+	}
+
+	@GetMapping(path = "/rewardPoints/customer/{customerId}/{year}/{month}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody GetCustomerTransactionsResponse getCustomerRewardPoints(@PathVariable Long customerId,
+			@PathVariable Integer year, @PathVariable Integer month) {
+
+		List<Transaction> transactions = transactionRepository.findAllByMonthAndYear(customerId, year, month);
+		BigDecimal total = BigDecimal.ZERO;
+
+		for (Transaction trans : transactions) {
+			BigDecimal rewardPoints = rewardsCalculator.calculateRewardPoints(trans.getAmount());
+			trans.setRewardPoints(rewardPoints);
+			total = total.add(rewardPoints);
+		}
+
+		GetCustomerTransactionsResponse response = new GetCustomerTransactionsResponse();
+		response.setTotalRewardPoints(total);
+		response.setTransactions(transactions);
+		return response;
+	}
+}

@@ -19,7 +19,7 @@ import com.rewardpoints.repository.CustomerRepository;
 import com.rewardpoints.repository.TransactionRepository;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:8081")
+@CrossOrigin(origins = "http://localhost:3000")
 public class RewardsController {
 
 	@Autowired
@@ -31,12 +31,25 @@ public class RewardsController {
 	@Autowired
 	TransactionRepository transactionRepository;
 
+	/**
+	 * Fetches all the customers from database
+	 * 
+	 * @return List of customers
+	 */
 	@GetMapping(path = "/rewardPoints/customers", produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody List<Customer> getCustomers() {
-
 		return customerRepository.findAll();
 	}
 
+	/**
+	 * This End point is to fetch transactions related to particular customer for a
+	 * month and calculate total reward points of the customer for the month
+	 * 
+	 * @param customerId
+	 * @param year
+	 * @param month
+	 * @return
+	 */
 	@GetMapping(path = "/rewardPoints/customer/{customerId}/{year}/{month}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody GetCustomerTransactionsResponse getCustomerRewardPoints(@PathVariable Long customerId,
 			@PathVariable Integer year, @PathVariable Integer month) {

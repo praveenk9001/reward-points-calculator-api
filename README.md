@@ -3,7 +3,7 @@
  1) /rewardPoints/customers (HTTP Method - GET)
  
 	Sample Response: 
-		 [
+		[
 			{
 				"id": 100,
 				"firstName": "PraveenKumar",
